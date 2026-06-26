@@ -1,0 +1,16 @@
+-- Initialises databases and schemas on first startup
+
+CREATE DATABASE airflow;
+CREATE DATABASE mlflow;
+
+\c retailpulse;
+
+CREATE SCHEMA IF NOT EXISTS silver;
+CREATE SCHEMA IF NOT EXISTS gold;
+
+GRANT ALL PRIVILEGES ON SCHEMA silver TO retailpulse;
+GRANT ALL PRIVILEGES ON SCHEMA gold   TO retailpulse;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA silver TO retailpulse;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA gold   TO retailpulse;
+ALTER DEFAULT PRIVILEGES IN SCHEMA silver GRANT ALL ON TABLES TO retailpulse;
+ALTER DEFAULT PRIVILEGES IN SCHEMA gold   GRANT ALL ON TABLES TO retailpulse;

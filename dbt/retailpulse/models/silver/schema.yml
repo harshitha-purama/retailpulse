@@ -1,0 +1,53 @@
+version: 2
+
+sources:
+  - name: public
+    database: retailpulse
+    schema: public
+    tables:
+      - name: users
+        columns:
+          - name: id
+            tests: [unique, not_null]
+          - name: email
+            tests: [unique, not_null]
+      - name: products
+        columns:
+          - name: id
+            tests: [unique, not_null]
+
+  - name: silver
+    database: retailpulse
+    schema: silver
+    tables:
+      - name: transactions
+        columns:
+          - name: order_id
+            tests: [unique, not_null]
+      - name: sessions
+        columns:
+          - name: session_id
+            tests: [unique, not_null]
+      - name: inventory_snapshots
+
+models:
+  - name: stg_users
+    description: "Cleaned user dimension from public.users"
+    columns:
+      - name: user_id
+        tests: [unique, not_null]
+  - name: stg_products
+    description: "Products with margin calculations"
+    columns:
+      - name: product_id
+        tests: [unique, not_null]
+  - name: stg_transactions
+    description: "Cleaned order transactions"
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+  - name: stg_sessions
+    description: "Aggregated clickstream sessions"
+    columns:
+      - name: session_id
+        tests: [unique, not_null]

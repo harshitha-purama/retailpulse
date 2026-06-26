@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: RetailPulse
+    orgId: 1
+    folder: RetailPulse
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

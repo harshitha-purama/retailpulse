@@ -1,0 +1,85 @@
+name: RetailPulse CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linting tools
+        run: pip install ruff black
+
+      - name: Ruff lint
+        run: ruff check data_generator/ spark/ airflow/ mlops/
+
+      - name: Black format check
+        run: black --check data_generator/ spark/ airflow/ mlops/
+
+  test-data-generator:
+    name: Test Data Generator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install faker psycopg2-binary kafka-python python-dotenv
+        working-directory: data_generator
+      - name: Import check
+        run: python -c "from producers.clickstream import ClickstreamProducer; from producers.orders import OrderProducer; print('OK')"
+        working-directory: data_generator
+
+  test-dbt:
+    name: dbt Compile Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dbt
+        run: pip install dbt-postgres==1.7.0
+      - name: dbt parse (compile without connection)
+        run: dbt parse --profiles-dir . --project-dir .
+        working-directory: dbt/retailpulse
+        env:
+          POSTGRES_HOST: localhost
+        continue-on-error: true
+
+  test-fastapi:
+    name: Test FastAPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install fastapi uvicorn pydantic mlflow scikit-learn pandas psycopg2-binary boto3
+        working-directory: mlops/serving
+      - name: Import check
+        run: python -c "from main import app; print('FastAPI app OK')"
+        working-directory: mlops/serving
+
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build data-generator image
+        run: docker build -t retailpulse/data-generator:test data_generator/
+      - name: Build fastapi image
+        run: docker build -t retailpulse/fastapi:test mlops/serving/

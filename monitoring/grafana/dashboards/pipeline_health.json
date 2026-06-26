@@ -1,0 +1,75 @@
+{
+  "title": "RetailPulse Pipeline Health",
+  "uid": "retailpulse-pipeline",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Daily Orders",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{
+        "datasource": "PostgreSQL",
+        "rawSql": "SELECT COUNT(*) AS value FROM silver.transactions WHERE order_date = CURRENT_DATE",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Daily Revenue (USD)",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [{
+        "datasource": "PostgreSQL",
+        "rawSql": "SELECT ROUND(SUM(total_amount),2) AS value FROM silver.transactions WHERE order_date = CURRENT_DATE AND status = 'delivered'",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Active Sessions (last hour)",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [{
+        "datasource": "PostgreSQL",
+        "rawSql": "SELECT COUNT(*) AS value FROM silver.sessions WHERE start_time > NOW() - INTERVAL '1 hour'",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Conversion Rate Today (%)",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [{
+        "datasource": "PostgreSQL",
+        "rawSql": "SELECT ROUND(AVG(CASE WHEN converted THEN 100.0 ELSE 0 END),2) AS value FROM silver.sessions WHERE session_date = CURRENT_DATE",
+        "format": "table"
+      }]
+    },
+    {
+      "id": 5,
+      "title": "Revenue Trend (7 days)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [{
+        "datasource": "PostgreSQL",
+        "rawSql": "SELECT order_date AS time, SUM(total_amount) AS revenue FROM silver.transactions WHERE order_date >= CURRENT_DATE - 7 GROUP BY order_date ORDER BY order_date",
+        "format": "time_series"
+      }]
+    },
+    {
+      "id": 6,
+      "title": "Orders by Category",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [{
+        "datasource": "PostgreSQL",
+        "rawSql": "SELECT primary_category AS metric, COUNT(*) AS value FROM silver.transactions WHERE order_date >= CURRENT_DATE - 7 GROUP BY primary_category ORDER BY value DESC LIMIT 8",
+        "format": "table"
+      }]
+    }
+  ]
+}

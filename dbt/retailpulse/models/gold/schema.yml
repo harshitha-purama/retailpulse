@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Customer dimension with CLV, churn flag, and order history"
+    columns:
+      - name: user_id
+        tests: [unique, not_null]
+      - name: total_revenue
+        tests: [not_null]
+
+  - name: dim_products
+    description: "Product dimension with ABC classification and revenue metrics"
+    columns:
+      - name: product_id
+        tests: [unique, not_null]
+
+  - name: fct_orders
+    description: "Order fact table enriched with customer tier and first-order flag"
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+
+  - name: agg_daily_revenue
+    description: "Daily revenue and order KPIs per category"
+
+  - name: agg_rfm_scores
+    description: "RFM segmentation scores and segments per customer"
+    columns:
+      - name: user_id
+        tests: [not_null]
+
+  - name: agg_cohort_retention
+    description: "Monthly cohort retention matrix (12-month window)"
+
+  - name: agg_funnel
+    description: "Daily conversion funnel from session to purchase"
+
+  - name: agg_churn_features
+    description: "Feature table for churn prediction ML model"

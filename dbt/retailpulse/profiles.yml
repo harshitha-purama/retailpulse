@@ -1,0 +1,12 @@
+retailpulse:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'postgres') }}"
+      port: 5432
+      user: retailpulse
+      password: retailpulse123
+      dbname: retailpulse
+      schema: public
+      threads: 4

@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb~
+
+# dbt
+dbt/retailpulse/target/
+dbt/retailpulse/dbt_packages/
+dbt/retailpulse/logs/
+
+# Airflow
+airflow/logs/
+airflow/*.db
+airflow/standalone_admin_password.txt
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Docker volumes / local data
+*.log
+*.pid
+
+# Environment
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Spark
+spark/jars/
+spark/.ivy2/
+
+# Temp
+tmp/
+.tmp/
