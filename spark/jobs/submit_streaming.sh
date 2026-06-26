@@ -1,7 +1,7 @@
 #!/bin/bash
 # Submit the Spark Structured Streaming job that ingests Kafka -> Bronze Delta Lake
 
-SPARK_HOME=/opt/bitnami/spark
+SPARK_HOME=/opt/spark
 PACKAGES="io.delta:delta-spark_2.12:3.1.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.592,org.postgresql:postgresql:42.7.1"
 
 $SPARK_HOME/bin/spark-submit \

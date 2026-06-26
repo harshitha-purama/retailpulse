@@ -1,5 +1,3 @@
-version: "3.8"
-
 networks:
   retailpulse-net:
     driver: bridge
@@ -32,10 +30,10 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
     healthcheck:
-      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181 | grep imok"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/commands/srvr"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
       start_period: 20s
     deploy:
       resources:
@@ -209,8 +207,9 @@ services:
   # ──────────────────────────────────────────────────────────────────────────
 
   spark-master:
-    image: bitnami/spark:3.5
+    image: apache/spark:3.5.1
     container_name: spark-master
+    user: root
     restart: unless-stopped
     networks:
       - retailpulse-net
@@ -218,12 +217,8 @@ services:
       - "8090:8080"
       - "7077:7077"
     environment:
-      SPARK_MODE: master
-      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
-      SPARK_RPC_ENCRYPTION_ENABLED: "no"
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
-      SPARK_SSL_ENABLED: "no"
-      SPARK_MASTER_OPTS: "-Dspark.deploy.defaultCores=2"
+      SPARK_NO_DAEMONIZE: "TRUE"
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master --port 7077 --webui-port 8080
     volumes:
       - ./spark/jobs:/opt/spark/jobs
     healthcheck:
@@ -238,7 +233,8 @@ services:
           memory: 1g
 
   spark-worker:
-    image: bitnami/spark:3.5
+    image: apache/spark:3.5.1
+    user: root
     restart: unless-stopped
     networks:
       - retailpulse-net
@@ -246,14 +242,8 @@ services:
       spark-master:
         condition: service_healthy
     environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_WORKER_MEMORY: 2G
-      SPARK_WORKER_CORES: 2
-      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
-      SPARK_RPC_ENCRYPTION_ENABLED: "no"
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
-      SPARK_SSL_ENABLED: "no"
+      SPARK_NO_DAEMONIZE: "TRUE"
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     volumes:
       - ./spark/jobs:/opt/spark/jobs
     deploy:
@@ -283,17 +273,8 @@ services:
       postgres:
         condition: service_healthy
     restart: on-failure
-    command: >
-      bash -c "
-        airflow db init &&
-        airflow users create
-          --username admin
-          --password admin
-          --firstname Admin
-          --lastname User
-          --role Admin
-          --email admin@retailpulse.com
-      "
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@retailpulse.com || true"]
 
   airflow-webserver:
     image: apache/airflow:2.8.0
@@ -387,12 +368,8 @@ services:
       MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    command: >
-      mlflow server
-        --host 0.0.0.0
-        --port 5000
-        --backend-store-uri postgresql+psycopg2://retailpulse:retailpulse123@postgres/mlflow
-        --default-artifact-root s3://mlflow-artifacts/
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["pip install psycopg2-binary boto3 -q && mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql+psycopg2://retailpulse:retailpulse123@postgres/mlflow --default-artifact-root s3://mlflow-artifacts/"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -401,11 +378,11 @@ services:
       minio-init:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
       interval: 20s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     deploy:
       resources:
         limits:
@@ -486,18 +463,8 @@ services:
     volumes:
       - ./superset/superset_config.py:/app/pythonpath/superset_config.py:ro
       - superset-data:/app/superset_home
-    command: >
-      bash -c "
-        superset db upgrade &&
-        superset fab create-admin
-          --username admin
-          --firstname Admin
-          --lastname User
-          --email admin@superset.com
-          --password admin &&
-        superset init &&
-        superset run -p 8088 --with-threads --reload --debugger
-      "
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["superset db upgrade && (superset fab create-admin --username admin --firstname Admin --lastname User --email admin@superset.com --password admin || true) && superset init && gunicorn --bind 0.0.0.0:8088 --workers 4 --timeout 120 'superset.app:create_app()'"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -513,7 +480,7 @@ services:
           memory: 1g
 
   jupyterlab:
-    image: jupyter/pyspark-notebook:spark-3.5.0
+    image: quay.io/jupyter/pyspark-notebook:spark-3.5.0
     container_name: jupyterlab
     restart: unless-stopped
     networks:
