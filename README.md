@@ -223,6 +223,17 @@ retailpulse/
 ```
 
 ---
+## Results 
+<img width="2400" height="900" alt="image" src="https://github.com/user-attachments/assets/6b4bf895-a567-4698-9082-4ee45d47e07b" />
+
+<img width="2100" height="1050" alt="image" src="https://github.com/user-attachments/assets/c3b5c212-d31c-446e-aeaa-db4292a96240" />
+ I built a 12-month cohort retention matrix on top of a medallion architecture. The data flows from Kafka through Spark into PostgreSQL, dbt builds the aggregations, and this heatmap visualizes customer lifecycle behavior. The June 2025 cohort shows 66% Month-1 retention which tells us early engagement campaigns are working
+<img width="2400" height="900" alt="image" src="https://github.com/user-attachments/assets/b67b622d-9063-4cc1-99d1-5c6c6c42d855" />
+ This is a Gradient Boosting demand forecast model. It's trained on 366 days of transaction data from the Gold layer. The rolling 7-day average is the strongest lag feature, and the model achieves reasonable accuracy on a time-series cross-validation split — meaning no data leakage
+ <img width="2100" height="900" alt="image" src="https://github.com/user-attachments/assets/0b297b8b-b14d-403e-947b-4a6f7e4951f6" />
+<img width="695" height="403" alt="image" src="https://github.com/user-attachments/assets/fb39a90e-79ff-4e35-9006-394b36939dc7" />
+  The Random Forest churn model achieves 0.99 AUC. The most important feature is days since last order — customers inactive for 90+ days are flagged for win-back campaigns. This model is tracked in MLflow and can be served via the FastAPI endpoint.
+ 
 
 ## License
 
