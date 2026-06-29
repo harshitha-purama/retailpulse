@@ -76,6 +76,8 @@
 | Observability | **Prometheus + Grafana** | Pipeline health + business KPI dashboards |
 | Infrastructure | **Docker Compose** | Full stack on a single machine |
 | CI/CD | **GitHub Actions** | Lint, test, Docker build on every push |
+<img width="980" height="641" alt="image" src="https://github.com/user-attachments/assets/d30cadfd-1095-4f9f-8228-68580a6a797c" />
+
 
 ---
 
@@ -228,6 +230,8 @@ retailpulse/
 
 <img width="2100" height="1050" alt="image" src="https://github.com/user-attachments/assets/c3b5c212-d31c-446e-aeaa-db4292a96240" />
  I built a 12-month cohort retention matrix on top of a medallion architecture. The data flows from Kafka through Spark into PostgreSQL, dbt builds the aggregations, and this heatmap visualizes customer lifecycle behavior. The June 2025 cohort shows 66% Month-1 retention which tells us early engagement campaigns are working
+ <img width="2100" height="750" alt="image" src="https://github.com/user-attachments/assets/e124bc41-3e9c-4ec6-b7ef-f1e2fd10dbf2" />
+ ran an A/B test splitting sessions by session ID parity. The new checkout flow showed a 43% lift in conversion rate, statistically significant at p=0.019. This means we can confidently ship the new flow.
 <img width="2400" height="900" alt="image" src="https://github.com/user-attachments/assets/b67b622d-9063-4cc1-99d1-5c6c6c42d855" />
  This is a Gradient Boosting demand forecast model. It's trained on 366 days of transaction data from the Gold layer. The rolling 7-day average is the strongest lag feature, and the model achieves reasonable accuracy on a time-series cross-validation split — meaning no data leakage
  <img width="2100" height="900" alt="image" src="https://github.com/user-attachments/assets/0b297b8b-b14d-403e-947b-4a6f7e4951f6" />
