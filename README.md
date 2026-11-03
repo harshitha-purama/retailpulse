@@ -141,6 +141,7 @@ Five Jupyter notebooks covering every major BA skill:
 ```bash
 git clone https://github.com/your-username/retailpulse.git
 cd retailpulse
+cp .env.example .env
 docker compose up -d
 ```
 
@@ -195,7 +196,7 @@ In Airflow UI → DAGs → `ml_training_pipeline` → Trigger
 ```
 retailpulse/
 ├── docker-compose.yml          # All 17 services
-├── .env                        # Environment variables
+├── .env.example                # Local development defaults; copy to .env
 ├── Makefile                    # make up / down / dbt-run / train-models
 │
 ├── data_generator/             # Python Kafka producers

@@ -56,3 +56,6 @@ spark/.ivy2/
 # Temp
 tmp/
 .tmp/
+
+# Local secrets
+.env
